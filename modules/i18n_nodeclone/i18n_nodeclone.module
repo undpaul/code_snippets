@@ -1,0 +1,324 @@
+<?php
+
+/**
+ * @file
+ *  This module provides a rules action to clone a source node to all
+ *  translatable languages.
+ */
+
+
+/**
+ * Implementation of hook_rules_action_info().
+ */
+function i18n_nodeclone_rules_action_info() {
+  return array(
+    'i18n_nodeclone_action_node_clone' => array(
+      'label' => t('Clone node into every enabled language'),
+      'arguments' => array(
+        'node' => array(
+          'type' => 'node',
+          'label' => t('Content'),
+        ),
+      ),
+      'module' => 'Node',
+    ),
+    'i18n_nodeclone_action_node_update' => array(
+      'label' => t('Update all translated nodes with nodereference and taxonomy translations'),
+      'arguments' => array(
+        'node' => array(
+          'type' => 'node',
+          'label' => t('Content'),
+        ),
+      ),
+      'module' => 'Node',
+    ),
+    'i18n_nodeclone_action_node_delete' => array(
+      'label' => t('Delete all translated nodes'),
+      'arguments' => array(
+        'node' => array(
+          'type' => 'node',
+          'label' => t('Content'),
+        ),
+      ),
+      'module' => 'Node',
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_rules_event_info()
+ */
+function i18n_nodeclone_rules_event_info() {
+  $items = array(
+    'i18n_nodeclone_node_delete' => array(
+      'label' => t('After deleting content - but before all other modules implement.'),
+      'module' => 'Node',
+      'arguments' => rules_events_node_arguments(t('deleted content'), t('content author')),
+    ),
+  );
+  return $items;
+}
+
+/**
+ * Implementation of hook_nodeapi().
+ */
+function i18n_nodeclone_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
+
+  // Run only if the node delete action is node initiated by i18n_nodeclone_action_node_delete().
+  if ($op == 'delete' && !_i18n_nodeclone_action_node_delete_cache($node->nid)) {
+    // We pass the node by reference so that changes are saved automatically on op submit
+    $arguments = array('node' => &$node);
+    rules_invoke_event('i18n_nodeclone_node_delete', $arguments);
+  }
+}
+
+
+/**
+ * Clone node to all other languages.
+ */
+function i18n_nodeclone_action_node_clone($node) {
+
+  $clone = drupal_clone($node);
+
+  // Only for nodes with a set language.
+  if ($clone->language) {
+
+    // If this is the source node. So sometimes (first insert tnid is not set allready)
+    if (!$clone->tnid) {
+      $clone->tnid = $clone->nid;
+    }
+
+    // Retrieve available languages.
+    $languages = i18n_language_list();
+
+    unset($languages[$clone->language]);
+
+    // Get translations for the current content
+    $translations = _i18n_nodeclone_node_get_translations($clone->tnid, TRUE);
+    unset($translations[$clone->language]);
+    foreach (array_keys($translations) as $langcode) {
+      unset($languages[$langcode]);
+    }
+
+    // Prepare
+    $clone->nid = NULL;
+    $clone->vid = NULL;
+    // set correct source (needed by transaltion.module to set tnid)
+    $clone->translation_source = $node;
+    $clone->i18n_nodeclone = TRUE;
+    unset($clone->menu);
+    // Do not use the source's path.
+    unset($clone->path);
+    unset($clone->old_alias);
+
+    $terms = array();
+
+    // Only for nodes in translation mode.
+    foreach ($languages as $langcode) {
+      $new = drupal_clone($clone);
+      $new->language = $langcode;
+
+      $new = _i18n_nodeclone_translate_fields($new, $clone);
+
+      node_save($new);
+    }
+  }
+}
+
+/**
+ * Update translated nodes with nodereference and taxonomy term translations.
+ */
+function i18n_nodeclone_action_node_update($node) {
+
+  // Only for nodes in translation sets.
+  if (isset($node->tnid)) {
+    // Get translations for the current content
+    $translations = _i18n_nodeclone_node_get_translations($node->tnid, TRUE);
+
+    foreach ($translations as $langcode => $translation) {
+      // Only for other nodes than the current.
+      if ($translation->nid != $node->nid) {
+        $translation = node_load($translation->nid);
+        $translation = _i18n_nodeclone_translate_fields($translation, $node);
+        node_save($translation);
+      }
+    }
+  }
+
+}
+
+/**
+ * Helper function to translate taxonomy terms, content taxonomy fields and
+ * nodereference field values to the adiquate language.
+ */
+function _i18n_nodeclone_translate_fields($objective, $source) {
+
+  $langcode = $objective->language;
+
+  // Translate taxonomy terms.
+  if (isset($source->taxonomy)) {
+    $objective->taxonomy = array();
+    foreach ($source->taxonomy as $id => $item) {
+      // Terms are grouped in vocalbulary array
+      if (is_array($item)) {
+        foreach ($item as $key => $tid) {
+          $objective->taxonomy[$id][$key] = _i18n_nodeclone_translated_term($tid, $langcode);
+        }
+      }
+      // Single terms are passed - either as object or simple term id.
+      // @see taxonomy_node_save()
+      elseif (isset($item)) {
+        $tid = $item;
+        if (is_object($item)) {
+          $tid = $item->tid;
+        }
+        // Allwys only set the tid to avoid complete term load.
+        $objective->taxonomy[$id] = _i18n_nodeclone_translated_term($tid, $langcode);
+      }
+    }
+  }
+
+  // Content taxonomy fields
+  $content_taxonomy = _i18n_nodeclone_fields('content_taxonomy');
+  foreach ($content_taxonomy as $taxfield) {
+    if (isset($source->$taxfield) && is_array($source->$taxfield)) {
+      $objective->$taxfield = array();
+      foreach ($source->$taxfield as $key => $val) {
+        $tid = $val['value'];
+        if ($tid) {
+          $tt = _i18n_nodeclone_translated_term($tid, $langcode);
+          $objective->{$taxfield}[$key]['value'] = $tt;
+        }
+      }
+    }
+  }
+
+  // Nodereference fields
+  $nodereferences = _i18n_nodeclone_fields('nodereference');
+  foreach ($nodereferences as $nrfield) {
+    if (isset($source->$nrfield) && is_array($source->$nrfield)) {
+      $objective->$nrfield = array();
+      foreach ($source->$nrfield as $key => $val) {
+        $nid = $val['nid'];
+        if ($nid) {
+          $tnid = _i18n_nodeclone_translated_node($nid, $langcode);
+          $objective->{$nrfield}[$key]['nid'] = $tnid;
+        }
+      }
+    }
+  }
+  return $objective;
+}
+
+/**
+ * Deletes all translated nodes, but the given one.
+ */
+function i18n_nodeclone_action_node_delete($node) {
+  $tnid = $node->tnid;
+  $nid = $node->nid;
+  if ($tnid) {
+    $nids = _i18n_nodeclone_translated_node($tnid, NULL);
+
+    foreach ($nids as $n) {
+      if ($n != $nid) {
+        _i18n_nodeclone_action_node_delete_cache($n);
+        node_delete($n);
+      }
+    }
+  }
+}
+
+/**
+ * Helper function to avoid nested node delete calls.
+ */
+function _i18n_nodeclone_action_node_delete_cache($nid) {
+  static $nids;
+  $exists = isset($nids[$nid]);
+  $nids[$nid] = $nid;
+  return $exists;
+}
+
+/**
+ * Helper function to get translation tid of a term.
+ */
+function _i18n_nodeclone_translated_term($tid, $langcode, $return_null = FALSE) {
+  static $terms;
+
+  // Only get translations once
+  if (!isset($terms[$tid])) {
+    $terms[$tid] = i18ntaxonomy_term_get_translations(array('tid' => $tid));
+  }
+  // Fallback to current tid if no translated one exists.
+  if (!isset($terms[$tid][$langcode])) {
+    return ($return_null) ? NULL : $tid;
+  }
+  return $terms[$tid][$langcode]->tid;
+}
+
+/**
+ * Helper function to retrieve the translated node of a nid in a given language.
+ */
+function _i18n_nodeclone_translated_node($nid, $langcode = NULL, $return_null = FALSE) {
+  static $nids;
+
+  if (!$nid) {
+    return FALSE;
+  }
+
+  $query = 'SELECT n.nid, n.language FROM {node} n LEFT JOIN {node} l ON (n.tnid = l.tnid) WHERE (l.nid = %d AND l.tnid != 0) OR l.tnid = %d';
+  if (!isset($nids[$nid])) {
+    $result = db_query($query, $nid, $nid);
+    $nids[$nid] = array();
+    while ($obj = db_fetch_object($result)) {
+      $nids[$nid][$obj->language] = $obj->nid;
+    }
+  }
+
+  if (!isset($langcode)) {
+    return $nids[$nid];
+  }
+  elseif (isset($nids[$nid][$langcode])) {
+    return $nids[$nid][$langcode];
+  }
+  // language neutral
+  elseif (!$return_null && isset($nids[$nid][''])) {
+    return $nids[$nid][''];
+  }
+  elseif (!$return_null) {
+    return $nid;
+  }
+  return NULL;
+}
+
+
+/**
+ * Helper function to retrieve special fields like content_taxonomy.
+ */
+function _i18n_nodeclone_fields($type) {
+  $fields = content_fields();
+  $return = array();
+  foreach ($fields as $fieldname => $field) {
+    if ($field['type'] == $type) {
+      $return[] = $fieldname;
+    }
+  }
+  return $return;
+}
+
+/**
+ * Copy of translation_node_get_translations() with a refresh switch.
+ */
+function _i18n_nodeclone_node_get_translations($tnid, $refresh = FALSE) {
+  static $translations = array();
+
+  if (is_numeric($tnid) && $tnid) {
+    if ($refresh || !isset($translations[$tnid])) {
+      $translations[$tnid] = array();
+      $result = db_query(db_rewrite_sql('SELECT n.nid, n.title, n.language FROM {node} n WHERE n.tnid = %d'), $tnid);
+      while ($node = db_fetch_object($result)) {
+        $translations[$tnid][$node->language] = $node;
+      }
+    }
+    return $translations[$tnid];
+  }
+}

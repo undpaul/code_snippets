@@ -1,0 +1,6 @@
+;$Id$
+name = "Solr Alter"
+description = 'Alters the solr search form to implement node types.'
+core = 6.x
+dependencies[] = apachesolr_search
+package = Apache Solr

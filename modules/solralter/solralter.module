@@ -1,0 +1,227 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ *   Adds additional functionality to solr search.
+ *   - selection of node types as checkboxes in search form
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function solralter_menu() {
+  $items = array();
+  $items['admin/settings/apachesolr/solralter'] = array(
+    'title'              => 'Solr Alter',
+    'page callback'      => 'drupal_get_form',
+    'page arguments'     => array('solralter_settings_form'),
+    'weight'             => 10,
+    'access arguments'   => array('administer search'),
+    'file'               => 'solralter.admin.inc',
+    'type'               => MENU_LOCAL_TASK,
+  );
+  return $items;
+}
+
+/**
+ * Implementation of hook_block().
+ *
+ * Provides a clone of facted block for node types, where node types can be
+ * merged to a single link.
+ */
+function solralter_block($op = 'list', $delta = 0, $edit = array()) {
+  if ($op == 'list') {
+    $blocks['facet_type'] = array(
+      'info' => t('Solralter: Faceted Type'),
+      'cache' => BLOCK_CACHE_PER_PAGE,
+    );
+    return $blocks;
+  }
+  else if ($op == 'view' && $delta == 'facet_type') {
+    // Copied in parts from apachesolr_search_block().
+    if (apachesolr_has_searched()) {
+      // Get the query and response. Without these no blocks make sense.
+      $response = apachesolr_static_response_cache();
+      if (empty($response)) {
+        return;
+      }
+      $query = apachesolr_current_query();
+      return solralter_facet_type_block($response, $query, 'apachesolr_search', 'type', 'type' , t('Filter by type'), 'apachesolr_search_get_type');
+    }
+
+  }
+}
+
+/**
+ * Helper function to retrieve default values from $_GET
+ */
+function _solralter_get_filternodetypes() {
+  $defaults = array();
+
+  // Custom Search style filter additions
+  $filters = $_GET['filters'];
+  if ($filters) {
+    $regex = '@(^| )type:([A-z0-9]*)@is';
+    $match = array();
+    $found = preg_match_all($regex, $filters, $match);
+    if ($found) {
+      foreach ($match[2] as $type) {
+        $defaults[$type] = $type;
+      }
+    }
+  }
+
+  return $defaults;
+}
+
+/**
+* Implementation of hook_apachesolr_modify_query().
+*
+* @param object $query
+*   Reference to the Solr_Base_Query object
+* @param mixed $params
+*   Controlling params for the query object
+*/
+function solralter_apachesolr_modify_query(&$query, &$params, $caller) {
+  /**
+   * Filters for multiple content types need to be applied to the Solr query object as an "or" condition instead of an "and" condition.
+   * To do this, we need to utilize a Solr subquery.
+   */
+  $node_types = _solralter_get_filternodetypes();
+
+  $subquery = apachesolr_drupal_query();
+  foreach($node_types as $type) {
+    // Remove existing filters on the given node type
+    $query->remove_filter('type', $type);
+    // Add a subquery to OR filters
+    $subquery->add_filter('type', $type);
+    $query->add_subquery($subquery, 'OR');
+  }
+}
+
+/**
+ * Helper function for displaying a facet block.
+ *
+ * Copied from apachesolr_facet_block().
+ *
+ * - module: 'apache_solr' to get the inital limits
+ * - delta: 'type'
+ * - facet field: 'type'
+ *
+ */
+function solralter_facet_type_block($response, $query, $module, $delta, $facet_field, $filter_by, $facet_callback = FALSE) {
+  if (!empty($response->facet_counts->facet_fields->$facet_field)) {
+    $contains_active = FALSE;
+    $items = array();
+    // Create item for each merged facet
+    $merge = _solralter_nodetypemerge();
+
+    // Add empty to check on
+    $merge['_empty_'] = '_empty_';
+
+    $facets = $response->facet_counts->facet_fields->$facet_field;
+
+    // Run each type.
+    foreach ($merge as $key_type => $val) {
+      // Retrieve the fields to merge for the given type.
+      $types = array_keys($merge, $key_type);
+      // Special handling for the empty one.
+      if ($key_type == '_empty_') {
+        $exclude = TRUE;
+        $facet = '[* TO *]';
+        $options = array('html' => TRUE);
+        $active = $query->has_filter($facet_field, $facet);
+        $facet_text = theme('placeholder', t('Missing this field'));
+        $sortpre = ($active) ? '*' : '-';
+        $count = $facets->$facet;
+        $new_query = clone $query;
+        $new_query->add_filter($facet_field, $facet, $exclude);
+        $options['query'] = $new_query->get_url_queryvalues();
+        $link = theme('apachesolr_facet_link', $facet_text, $new_query->get_path(), $options, $count, FALSE, $response->response->numFound);
+      }
+      elseif (count($types)) {
+        $count = 0;
+        $exclude = FALSE;
+        $active_types = array();
+        $options = array();
+
+        // Key type is for facet text
+        if ($facet_callback && function_exists($facet_callback)) {
+          $facet_text = $facet_callback($key_type, $options);
+        }
+        else {
+          $facet_text = $key_type;
+        }
+
+        // First check if types are all set
+        foreach ($types as $type) {
+          if (isset($facets->$type)) {
+            // Collect if types are active
+            $active_types[$type] = $query->has_filter($facet_field, $type);
+            $count += $facets->$type;
+          }
+        }
+
+        $all_active = (count($active_types) && count($active_types) == count(array_filter($active_types)));
+
+        // Assigned types are for adding filters.
+        $new_query = clone $query;
+        foreach ($active_types as $type => $active) {
+          if ($active && $all_active) {
+            $contains_active = TRUE;
+            $new_query->remove_filter($facet_field, $type);
+          }
+          elseif ($active) {
+            $contains_active = TRUE;
+            // Nothing more as others have to be set active first
+          }
+          else {
+            $new_query->add_filter($facet_field, $type, $exclude);
+          }
+        }
+
+        $options['query'] = $new_query->get_url_queryvalues();
+        if ($all_active) {
+          $link = theme('apachesolr_unclick_link', $facet_text, $new_query->get_path(), $options);
+          // '*' sorts before all numbers.
+          $sortpre = '*';
+        }
+        else {
+          $link = theme('apachesolr_facet_link', $facet_text, $new_query->get_path(), $options, $count, FALSE, $response->response->numFound);
+          $sortpre = 1000000 - $count;
+        }
+      }
+
+      if ($count || $all_active) {
+        $items[$sortpre . '*' . $facet_text] = $link;
+      }
+    }
+
+    // Unless a facet is active only display 2 or more.
+    if ($items && ($response->response->numFound > 1 || $contains_active)) {
+      ksort($items, SORT_STRING);
+      // Get information needed by the rest of the blocks about limits.
+      $initial_limits = variable_get('apachesolr_facet_query_initial_limits', array());
+      $limit = isset($initial_limits[$module][$delta]) ? $initial_limits[$module][$delta] : variable_get('apachesolr_facet_query_initial_limit_default', 10);
+      $output = theme('apachesolr_facet_list', $items, $limit);
+      return array('subject' => $filter_by, 'content' => $output);
+    }
+  }
+  return NULL;
+}
+
+
+/**
+ * Helper function to retrieve nodetypemerge settings.
+ */
+function _solralter_nodetypemerge() {
+  $merge = variable_get('solralter_nodetypemerge', NULL);
+
+  if (!isset($merge)) {
+    $nodetypes = node_get_types('names');
+    $keys = array_keys($nodetypes);
+    $merge = array_combine($keys, $keys);
+  }
+  return $merge;
+}

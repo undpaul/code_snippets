@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file i18n Nodeclone - Installation file.
+ */
+
+/**
+ * Implementation of hook_install().
+ *
+ * Set system weight down.
+ */
+function i18n_nodeclone_install() {
+  // Set the modules' weight to -9992 to invoke nodeapi:delete before all other modules.
+  db_query("UPDATE {system} SET weight = -999 WHERE name = 'i18n_nodeclone'");
+}
+
+/**
+ * Alter weight of i18n nodeclone.
+ */
+function i18n_nodeclone_update_6001() {
+  $items = array();
+  $items[] = update_sql("UPDATE {system} SET weight = -999 WHERE name = 'i18n_nodeclone'");
+  return $items;
+}

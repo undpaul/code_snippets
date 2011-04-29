@@ -1,0 +1,5 @@
+name = "Content taxonomy alter"
+description = 'Slight modifications to content taxonomy (autocomplete).'
+core = 6.x
+dependencies[] = content_taxonomy
+package = CCK

@@ -1,0 +1,6 @@
+;$Id$
+name = "Taxonomy translation PLUS"
+description = 'Adds additional views and cck behaviour for i18n taxonomy.'
+core = 6.x
+dependencies[] = i18ntaxonomy
+package = Multilanguage

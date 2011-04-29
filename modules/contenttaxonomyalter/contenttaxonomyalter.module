@@ -1,0 +1,74 @@
+<?php
+
+/**
+ * @file
+ *   Alteration to content taxonomy.
+ *
+ *   - Change tha autocomplete callback to use only "start with"
+ */
+
+/**
+ * Implementation of hook_menu_alter().
+ */
+function contenttaxonomyalter_menu_alter(&$items) {
+  if (isset($items['content_taxonomy/autocomplete'])) {
+    $items['content_taxonomy/autocomplete']['page callback'] = 'content_taxonomy_autocomplete_load_altered';
+  }
+}
+
+/**
+ * Altered version of content_taxonomy_autocomplete_load() that searches with
+ * 'start with' instead of 'contains'.
+ *
+ * @see content_taxonomy_autocomplete_load()
+ */
+function content_taxonomy_autocomplete_load_altered($field_name, $string = '') {
+   // The user enters a comma-separated list of tags. We only autocomplete the last tag.
+  // This regexp allows the following types of user input:
+  // this, "somecmpany, llc", "and ""this"" w,o.rks", foo bar
+  $content_type_info = _content_type_info();
+  $vid = $content_type_info['fields'][$field_name]['vid'];
+  $tid = content_taxonomy_field_get_parent($content_type_info['fields'][$field_name]);
+
+  // If the menu system has splitted the search text because of slashes, glue it back.
+  if (func_num_args() > 2) {
+    $args = func_get_args();
+    $string .= '/'. implode('/', array_slice($args, 2));
+  }
+
+  // The user enters a comma-separated list of tags. We only autocomplete the last tag.
+  $array = drupal_explode_tags($string);
+
+  // Fetch last tag
+  $last_string = trim(array_pop($array));
+  $matches = array();
+  if ($last_string != '') {
+    if ($tid) {
+      $result = db_query_range(db_rewrite_sql("SELECT t.name FROM {term_data} t
+        LEFT JOIN {term_synonym} s ON t.tid = s.tid
+        INNER JOIN {term_hierarchy} h ON  t.tid = h.tid
+        WHERE h.parent = %d
+        AND (LOWER(t.name) LIKE LOWER('%s%%') OR LOWER(s.name) LIKE LOWER('%s%%'))", 't', 'tid'),
+        $tid,$last_string,$last_string,0,10);
+    }
+    else {
+      $result = db_query_range(db_rewrite_sql("SELECT t.name FROM {term_data} t
+        LEFT JOIN {term_synonym} s ON t.tid = s.tid
+        WHERE t.vid = %d
+        AND (LOWER(t.name) LIKE LOWER('%s%%') OR LOWER(s.name) LIKE LOWER('%s%%'))", 't', 'tid'),
+        $vid, $last_string, $last_string, 0, 10);
+    }
+    $prefix = count($array) ? '"'. implode('", "', $array) .'", ' : '';
+
+    while ($tag = db_fetch_object($result)) {
+      $n = $tag->name;
+      // Commas and quotes in terms are special cases, so encode 'em.
+      if (strpos($tag->name, ',') !== FALSE || strpos($tag->name, '"') !== FALSE) {
+        $n = '"'. str_replace('"', '""', $tag->name) .'"';
+      }
+      $matches[$prefix . $n] = check_plain($tag->name);
+    }
+  }
+
+  drupal_json($matches);
+}

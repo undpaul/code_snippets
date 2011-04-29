@@ -1,0 +1,8 @@
+name = i18n Node Clone
+description = Clones nodes for each language from the source node.
+package = Multilanguage
+core = 6.x
+
+dependencies[] = translation
+dependencies[] = i18n
+dependencies[] = rules

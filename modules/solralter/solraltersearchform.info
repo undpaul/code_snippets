@@ -1,0 +1,6 @@
+;$Id$
+name = "Solr Alter Search Form"
+description = 'Provides checkboxes on search form to select node types.'
+core = 6.x
+dependencies[] = solralter
+package = Apache Solr

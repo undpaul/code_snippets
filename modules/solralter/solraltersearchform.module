@@ -1,0 +1,83 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ *   Adds additional functionality to solr search.
+ *   - selection of node types as checkboxes in search form
+ */
+
+/**
+ * Implementation of hook_form_FORM_ID_alter().
+ *
+ * Addes the node type selection to the solr search form.
+ */
+function solraltersearchform_form_search_form_alter(&$form, $form_state) {
+  if ($form['module']['#value'] == 'apachesolr_search') {
+
+    $nodetypes = node_get_types('names');
+
+    $restricted_to = variable_get('solralter_nodetypes', FALSE);
+
+    if ($restricted_to && is_array($restricted_to)) {
+      $restricted_to = array_filter($restricted_to);
+      $nodetypes = array_intersect_key($nodetypes, $restricted_to);
+    }
+
+    $default = _solralter_get_filternodetypes();
+    $form['node_types'] = array(
+      '#type' => 'checkboxes',
+      '#title' => t('Node types'),
+      '#options' => $nodetypes,
+      '#default_value' => array_keys($default),
+    );
+
+    // Replace apachesolr_search submit function to implement node type handling in filters.
+    $form['#submit'] = str_replace('apachesolr_search_form_search_submit', '_solralter_search_form_submit', $form['#submit']);
+  }
+
+}
+
+/**
+ * Replacement of apachesolr_search_form_search_submit().
+ *
+ * Additionaly integrates the selected node types.
+ */
+function _solralter_search_form_submit($form, &$form_state) {
+  $fv = $form_state['values'];
+  $keys = $fv['processed_keys'];
+  $base = 'search/'. $fv['module'] . '/';
+  if (variable_get('clean_url', '0')) {
+    $keys = str_replace('+', '%2B', $keys);
+  }
+  $get = json_decode($fv['apachesolr_search']['get'], TRUE);
+  $queryvalues = json_decode($fv['apachesolr_search']['queryvalues'], TRUE);
+
+  $form_state['values']['apachesolr_search']['get'] = json_encode($get);
+  if (!empty($fv['apachesolr_search']['retain-filters']) && $queryvalues) {
+    $get = $queryvalues + $get;
+    $get['retain-filters'] = '1';
+  }
+
+  // Add additional node types to get
+  if (isset($fv['node_types']) && is_array($fv['node_types'])) {
+    if (isset($get['filters'])) {
+      // Remove existing type filters before adding the selected, unless there
+      // are any, as no selection will mean 'all node types'.
+      $regex = '@(^| )type:([A-z0-9]*)@is';
+      $get['filters'] = preg_replace($regex, '', $get['filters']);
+    }
+    $node_types = array_filter($fv['node_types']);
+    if (count($node_types)) {
+      // Add new filters
+      $get['filters'] .= ' type:'. implode(' type:', $node_types);
+      $get['filters'] = trim($get['filters']);
+    }
+  }
+
+  $form_state['redirect'] = array($base . $keys, $get);
+  if ($keys == '' && !$queryvalues) {
+    form_set_error('keys', t('Please enter some keywords.'));
+  }
+
+}

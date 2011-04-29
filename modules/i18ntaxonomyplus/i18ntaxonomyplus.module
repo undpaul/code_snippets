@@ -1,0 +1,67 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ *   Adds additional functionality for i18ntaxonomy translated terms.
+ *   - views argument (http://drupal.org/project/views)
+ *   - content taxonomy formatter (http://drupal.org/project/content_taxonomy)
+ */
+
+
+/**
+ * Implementation of hook_theme().
+ */
+function i18ntaxonomyplus_theme() {
+  $path = drupal_get_path('module', 'i18ntaxonomyplus') . '/includes/cck';
+  return array(
+    'i18ntaxonomyplus_formatter_text_translated' => array(
+      'arguments' => array('element' => NULL),
+      'path' => $path,
+      'file' => 'content_taxonomy.formatter.inc',
+    ),
+    'i18ntaxonomyplus_formatter_link_translated' => array(
+      'arguments' => array('element' => NULL),
+      'path' => $path,
+      'file' => 'content_taxonomy.formatter.inc',
+    ),
+    'i18ntaxonomyplus_formatter_link_totranslated' => array(
+      'arguments' => array('element' => NULL),
+      'path' => $path,
+      'file' => 'content_taxonomy.formatter.inc',
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+function i18ntaxonomyplus_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'i18ntaxonomyplus') . '/includes/views',
+  );
+}
+
+/**
+ * Implementation of hook_field_formatter_info().
+ */
+function i18ntaxonomyplus_field_formatter_info() {
+  return array(
+    'text_translated' => array(
+      'label' => t('As Text - translated'),
+      'field types' => array('content_taxonomy'),
+      'multiple values' => CONTENT_HANDLE_CORE,
+    ),
+    'link_translated' => array(
+      'label' => t('As Link - translated'),
+      'field types' => array('content_taxonomy'),
+      'multiple values' => CONTENT_HANDLE_CORE,
+    ),
+    'link_totranslated' => array(
+      'label' => t('As Link - to translated'),
+      'field types' => array('content_taxonomy'),
+      'multiple values' => CONTENT_HANDLE_CORE,
+    ),
+  );
+}
