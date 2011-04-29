@@ -4,7 +4,8 @@
 /**
  * @file
  *   Adds additional functionality to solr search.
- *   - selection of node types as checkboxes in search form
+ *   - Provide ability to use multiple values on one filter (nodetype at the moment).
+ *   - Setting to merge node types in Faceted Block display (special block).
  */
 
 /**
@@ -27,7 +28,7 @@ function solralter_menu() {
 /**
  * Implementation of hook_block().
  *
- * Provides a clone of facted block for node types, where node types can be
+ * Provides a clone of faceted block for node types, where node types can be
  * merged to a single link.
  */
 function solralter_block($op = 'list', $delta = 0, $edit = array()) {
