@@ -1,0 +1,7 @@
+/sites/*/local.settings.php
+/sites/*/files/
+.svn
+*.komodoproject
+*.komodotools
+.DS_Store
+
