@@ -1,0 +1,35 @@
+<?php
+
+/**
+ * Implementation of hook_views_api().
+ */
+function views_goto_views_api(){
+  $arr = array(
+    'api' => '2.0',
+  );
+ return $arr;
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function views_goto_theme() {
+  return array(
+    'views_goto' => array(
+      'arguments' => array('view' => NULL),
+    ),
+  );
+}
+
+/**
+ * Theming function for views goto plugin.
+ */
+function theme_views_goto($view) {
+  if (count($view->result)) {
+    $first = current($view->result);
+    if (isset($first->nid)) {
+      drupal_goto("node/$first->nid");
+    }
+  }
+  drupal_not_found();
+}

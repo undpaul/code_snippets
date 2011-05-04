@@ -1,0 +1,1 @@
+A views plugin, that redirects a view, to the first node in results.

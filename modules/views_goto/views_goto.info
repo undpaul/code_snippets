@@ -1,0 +1,5 @@
+name = Views Goto
+description = "redirects a link to a views first item's node"
+dependencies[] = views
+package = Views
+core = 6.x
