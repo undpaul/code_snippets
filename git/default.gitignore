@@ -5,3 +5,7 @@
 *.komodotools
 .DS_Store
 Thumbs.db
+.project
+.buildpath
+.settings
+*.esproj
