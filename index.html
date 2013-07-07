@@ -24,7 +24,8 @@
     a { color: #FFF; }
     .description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
     .download { float: right; }
-    pre { background: #000; color: #fff; padding: 15px;}
+    pre { background: #000; color: #fff; padding: 15px; overflow-x: auto; }
+    pre.terminal:before { content:"$ "; }
     hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
     .footer { text-align:center; padding-top:30px; font-style: italic; }
   </style>
@@ -41,14 +42,14 @@
 
     <ul>
       <li><a href="https://github.com/undpaul/code_snippets/blob/master/git/default.gitignore">.gitignore for drupal projects</a>
-        <pre>$ curl https://raw.github.com/undpaul/code_snippets/master/git/default.gitignore > .gitignore</pre>
+        <pre class="terminal">curl https://raw.github.com/undpaul/code_snippets/master/git/default.gitignore > .gitignore</pre>
       </li>
       <li><a href="https://github.com/undpaul/code_snippets/blob/master/git/freistilbox.gitignore">.gitignore for drupal projects on freistilbox</a>
-        <pre>$ curl https://raw.github.com/undpaul/code_snippets/master/git/freistilbox.gitignore > .gitignore</pre>
+        <pre class="terminal">curl https://raw.github.com/undpaul/code_snippets/master/git/freistilbox.gitignore > .gitignore</pre>
       </li>
       <li><a href="https://github.com/undpaul/code_snippets/blob/master/sh/undpaul-update.sh">a bash file for executing a sites/all/scripts/update.sh from any place in the drupal folder</a>
-        <pre>$ cd ~
-$ curl https://raw.github.com/undpaul/code_snippets/master/sh/undpaul-update.sh > .drush/undpaul-update.sh</pre>
+        <pre class="terminal">cd ~
+curl https://raw.github.com/undpaul/code_snippets/master/sh/undpaul-update.sh > .drush/undpaul-update.sh</pre>
         Then just add a global alias in your <code>.zshrc</code> or <code>.bash_profile</code>:
         <pre>alias uu="sh ~/.drush/undpaul-update.sh"</pre>
       </li>
@@ -59,7 +60,7 @@ $ curl https://raw.github.com/undpaul/code_snippets/master/sh/undpaul-update.sh 
 
     <p>You can also clone the project with <a href="http://git-scm.com">Git</a>
       by running:
-      <pre>$ git clone git://github.com/undpaul/code_snippets</pre>
+      <pre class="terminal">git clone git://github.com/undpaul/code_snippets</pre>
     </p>
 
     <div class="footer">
