@@ -11,14 +11,16 @@ sites/*/local.settings.php
 /docroot/sites/*/local.settings.php 
 /docroot/sites/*/settings.php 
 /docroot/sites/*/files
+
 # Ignore base .htaccess and .htpasswd.
 /docroot/.htaccess 
 /docroot/.htpasswd
+
 # Ignore other files.
 .DS_Store* 
 Thumbs.db 
 ehthumbs.db 
-.svn 
+.svn
 *.komodoproject 
 *.komodotools 
 .DS_Store 
@@ -27,3 +29,4 @@ Thumbs.db
 .buildpath 
 *.esproj
 .idea
+.sass-cache

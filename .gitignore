@@ -3,3 +3,4 @@
 *.komodotools
 .DS_Store
 Thumbs.db
+.idea

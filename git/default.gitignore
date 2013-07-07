@@ -1,5 +1,9 @@
-/sites/*/local.settings.php
-/sites/*/files
+# Ignore drupal specifics
+sites/*/files
+sites/*/local.settings.php
+sites/*/files
+
+# Ignore other files.
 .svn
 *.komodoproject
 *.komodotools
@@ -10,3 +14,5 @@ Thumbs.db
 .settings
 *.esproj
 nbproject
+.idea
+.sass-cache
