@@ -1,32 +1,32 @@
 # Ignore freistilbox related files 
-/config 
-/private 
+/config
+/private
 /tmp
 
 # Ignore configuration files that may contain sensitive information.
-sites/*/settings.php 
+sites/*/settings.php
 sites/*/local.settings.php
 
 # Ignore paths that contain user-generated content.
-/docroot/sites/*/local.settings.php 
-/docroot/sites/*/settings.php 
+/docroot/sites/*/local.settings.php
+/docroot/sites/*/settings.php
 /docroot/sites/*/files
 
 # Ignore base .htaccess and .htpasswd.
-/docroot/.htaccess 
+/docroot/.htaccess
 /docroot/.htpasswd
 
 # Ignore other files.
-.DS_Store* 
-Thumbs.db 
-ehthumbs.db 
+.DS_Store*
+Thumbs.db
+ehthumbs.db
 .svn
-*.komodoproject 
-*.komodotools 
-.DS_Store 
-Thumbs.db 
-.project 
-.buildpath 
+*.komodoproject
+*.komodotools
+.DS_Store
+Thumbs.db
+.project
+.buildpath
 *.esproj
 .idea
 .sass-cache
