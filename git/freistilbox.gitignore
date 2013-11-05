@@ -3,11 +3,7 @@
 /private
 /tmp
 
-# Ignore configuration files that may contain sensitive information.
-sites/*/settings.php
-sites/*/local.settings.php
-
-# Ignore paths that contain user-generated content.
+# Ignore paths that that may contain sensitive information.
 /docroot/sites/*/local.settings.php
 /docroot/sites/*/settings.php
 /docroot/sites/*/files
