@@ -8,21 +8,20 @@
 /docroot/sites/*/settings.php
 /docroot/sites/*/files
 
-# Ignore base .htaccess and .htpasswd.
+# Ignore base .htaccess and .htpasswd as we use .htaccess.live & Co.
 /docroot/.htaccess
 /docroot/.htpasswd
 
-# Ignore other files.
+# Ignore other files, e.g temprory files from IDEs or OS
+.buildpath
 .DS_Store*
-Thumbs.db
-ehthumbs.db
+.idea
+.project
+.sass-cache
 .svn
+*.esproj
 *.komodoproject
 *.komodotools
-.DS_Store
+ehthumbs.db
+nbproject
 Thumbs.db
-.project
-.buildpath
-*.esproj
-.idea
-.sass-cache
