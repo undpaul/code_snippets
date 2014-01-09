@@ -3,9 +3,9 @@ HOST=${1}
 
 if [ "$HOST" = "" ]
 then
-  DRUPAL_ROOT=$(drush status drupal-root --pipe)
+  DRUPAL_ROOT=$(drush status drupal-root --format=list)
 else
-  DRUPAL_ROOT=$(drush -l $HOST status drupal-root --pipe)
+  DRUPAL_ROOT=$(drush -l $HOST status drupal-root --format=list)
 fi
 
 # If we got a drual root, we might find the update script and execute it.
