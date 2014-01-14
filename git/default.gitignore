@@ -1,18 +1,17 @@
 # Ignore drupal specifics
 sites/*/files
 sites/*/local.settings.php
-sites/*/files
 
 # Ignore other files.
+.DS_Store
+.buildpath
+.idea
+.project
+.sass-cache
+.settings
 .svn
+*.esproj
 *.komodoproject
 *.komodotools
-.DS_Store
-Thumbs.db
-.project
-.buildpath
-.settings
-*.esproj
 nbproject
-.idea
-.sass-cache
+Thumbs.db
