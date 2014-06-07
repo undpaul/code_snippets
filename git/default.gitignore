@@ -1,5 +1,6 @@
 # OS specific temporary files
-.DS_Store
+.DS_Store*
+ehthumbs.db
 Thumbs.db
 
 # IDEs
