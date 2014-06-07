@@ -1,4 +1,23 @@
-# Ignore freistilbox related files 
+# OS specific temporary files
+.DS_Store*
+ehthumbs.db
+Thumbs.db
+
+# IDEs
+.buildpath
+.idea
+.project
+.settings
+*.esproj
+*.komodoproject
+*.komodotools
+nbproject
+
+# Tools
+.svn
+.sass-cache
+
+# Ignore freistilbox specific folders 
 /config
 /private
 /tmp
@@ -12,16 +31,4 @@
 /docroot/.htaccess
 /docroot/.htpasswd
 
-# Ignore other files, e.g temprory files from IDEs or OS
-.buildpath
-.DS_Store*
-.idea
-.project
-.sass-cache
-.svn
-*.esproj
-*.komodoproject
-*.komodotools
-ehthumbs.db
-nbproject
-Thumbs.db
+
