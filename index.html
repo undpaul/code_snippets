@@ -30,36 +30,38 @@
     <div id="site-subheader" class="clearfix"></div>
 
     <div id="main">
-    
+
       <h2><a href="https://github.com/undpaul/code_snippets/blob/master/git/default.gitignore">.gitignore for drupal projects without docroot</a></h2>
       <p><pre class="terminal">curl https://raw.github.com/undpaul/code_snippets/master/git/default.gitignore &gt; .gitignore</pre></p>
 
       <h2><a href="https://github.com/undpaul/code_snippets/blob/master/git/freistilbox.gitignore">.gitignore for drupal projects with docroot (e.g. on freistilbox)</a></h2>
       <p><pre class="terminal">curl https://raw.github.com/undpaul/code_snippets/master/git/freistilbox.gitignore &gt; .gitignore</pre></p>
 
-      <h2><a href="https://github.com/undpaul/code_snippets/blob/master/sh/undpaul-update.sh">a bash file for executing a sites/all/scripts/update.sh from any place in the drupal folder</a></h2>
+      <h2><a href="https://github.com/undpaul/code_snippets/tree/master/settings.php">settings.php structure</a></h2>
       <p>
-        <pre class="terminal">cd ~ curl https://raw.github.com/undpaul/code_snippets/master/sh/undpaul-update.sh &gt; .drush/undpaul-update.sh</pre>
-        Then just add a global alias in your <code>.zshrc</code> or <code>.bash_profile</code>:
-        <pre>alias uu="sh ~/.drush/undpaul-update.sh"</pre>
+        <pre class="terminal">curl -O https://raw.githubusercontent.com/undpaul/code_snippets/master/settings.php/default.local.settings.php</pre>
+        <pre class="terminal">curl -O https://raw.githubusercontent.com/undpaul/code_snippets/master/settings.php/settings.local.php</pre>
+        <pre class="terminal">curl -O https://raw.githubusercontent.com/undpaul/code_snippets/master/settings.php/shared.settings.php</pre>
+        <pre class="terminal">ln -s settings.local.php settings.php</pre>
       </p>
 
-      <hr>
+      <p>&nbsp;</p>
+      <p>&nbsp;</p>
 
       <h2>Contact</h2>
       <p>Johannes Haseitl - undpaul GmbH (johannes@undpaul.de)</p>
 
-    <p>You can also clone the project with <a href="http://git-scm.com">Git</a>
-      by running:
+      <p>You can also clone the project with <a href="http://git-scm.com">Git</a>
+        by running:
       </p><pre class="terminal">git clone git://github.com/undpaul/code_snippets</pre>
-    <p></p>
+      <p></p>
 
-    <div class="footer">
-      get the source code on GitHub : <a href="https://github.com/undpaul/code_snippets">undpaul/code_snippets</a>
+      <div class="footer">
+        get the source code on GitHub : <a href="https://github.com/undpaul/code_snippets">undpaul/code_snippets</a>
+      </div>
+
     </div>
 
-  </div>
-
-</div></div></div>
+  </div></div></div>
 </body>
 </html>
