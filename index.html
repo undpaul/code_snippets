@@ -3,68 +3,73 @@
 <head>
   <meta charset='utf-8'>
   <title>undpaul/code_snippets @ GitHub</title>
-  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  <link rel="stylesheet"
+        href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
   <link type="text/css" rel="stylesheet" href="../css/style.css" media="all"/>
 </head>
 
-<body class="front">
-<div id="page-wrapper-outer"><div id="page-wrapper">
-  <div id="page">
+<body>
+<header>
+  <h1>
+  <a href="/">undpaul</a>
+  &gt; code_snippets
+  <i class="fa fa-code"></i>
+  </h1>
+</header>
 
-    <div id="site-header">
-      <div id="site-menu">
-        <ul class="menu"><li>
-          <a href="https://github.com/undpaul/code_snippets">Fork me on GitHub</a>
-        </li></ul>
-      </div>
+<div class="main">
 
-      <h1>
-        <a href="/">undpaul</a>
-        &gt; code_snippets
-        <i class="fa fa-code"></i>
-      </h1>
+  <p class="description">
+     These are code snippets for common usage in drupal installations.
+    <a href="https://github.com/undpaul/code_snippets">Fork it on github</a>.
+  </p>
 
-    </div>
+  <h2><a
+    href="https://github.com/undpaul/code_snippets/blob/master/git/default.gitignore">.gitignore
+    for drupal projects without docroot</a></h2>
 
-    <div id="site-subheader" class="clearfix"></div>
+  <p>
+  <pre class="terminal">curl https://raw.githubusercontent.com/undpaul/code_snippets/master/git/default.gitignore &gt; .gitignore</pre>
+  </p>
 
-    <div id="main">
+  <h2><a
+    href="https://github.com/undpaul/code_snippets/blob/master/git/freistilbox.gitignore">.gitignore
+    for drupal projects with docroot (e.g. on freistilbox)</a></h2>
 
-      <div class="description">
-        a code snippet repository for common usage in drupal installations
-      </div>
+  <p>
+  <pre class="terminal">curl https://raw.githubusercontent.com/undpaul/code_snippets/master/git/freistilbox.gitignore &gt; .gitignore</pre>
+  </p>
 
-      <h2><a href="https://github.com/undpaul/code_snippets/blob/master/git/default.gitignore">.gitignore for drupal projects without docroot</a></h2>
-      <p><pre class="terminal">curl https://raw.githubusercontent.com/undpaul/code_snippets/master/git/default.gitignore &gt; .gitignore</pre></p>
+  <h2><a href="https://github.com/undpaul/code_snippets/tree/master/settings.php">
+    settings.php structure
+  </a></h2>
 
-      <h2><a href="https://github.com/undpaul/code_snippets/blob/master/git/freistilbox.gitignore">.gitignore for drupal projects with docroot (e.g. on freistilbox)</a></h2>
-      <p><pre class="terminal">curl https://raw.githubusercontent.com/undpaul/code_snippets/master/git/freistilbox.gitignore &gt; .gitignore</pre></p>
-
-      <h2><a href="https://github.com/undpaul/code_snippets/tree/master/settings.php">settings.php structure</a></h2>
-      <p>
-                <pre class="terminal">curl -O https://raw.githubusercontent.com/undpaul/code_snippets/master/settings.php/default.local.settings.php
+  <p>
+    <pre class="terminal">curl -O https://raw.githubusercontent.com/undpaul/code_snippets/master/settings.php/default.local.settings.php
   curl -O https://raw.githubusercontent.com/undpaul/code_snippets/master/settings.php/settings.local.php;
   curl -O https://raw.githubusercontent.com/undpaul/code_snippets/master/settings.php/shared.settings.php;
   ln -s settings.local.php settings.php;</pre>
-      </p>
+  </p>
 
-      <p>&nbsp;</p>
-      <p>&nbsp;</p>
+</div>
 
-      <h2>Contact</h2>
-      <p>Johannes Haseitl - undpaul GmbH (johannes@undpaul.de)</p>
 
-      <p>You can also clone the project with <a href="http://git-scm.com">Git</a>
-        by running:
-      </p><pre class="terminal">git clone git://github.com/undpaul/code_snippets</pre>
-      <p></p>
+<footer>
+  <a href="http://www.undpaul.de/" title="Die Drupal Spezialisten">undpaul
+    GmbH</a>
+  - Die Drupal Spezialisten
+  <br><a href="http://www.undpaul.de/impressum">Impressum</a>
+</footer>
 
-      <div class="footer">
-        get the source code on GitHub : <a href="https://github.com/undpaul/code_snippets">undpaul/code_snippets</a>
-      </div>
+<script
+  src="//ajax.googleapis.com/ajax/libs/webfont/1.5.10/webfont.js"></script>
+<script>
+  WebFont.load({
+    google: {
+      families: ['Source Sans Pro']
+    }
+  });
+</script>
 
-    </div>
-
-  </div></div></div>
 </body>
 </html>
